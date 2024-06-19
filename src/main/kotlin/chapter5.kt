@@ -6,12 +6,13 @@ fun main() {
     sub_5_5()
     sub_5_6()
     sub_5_7()
+    sub_5_8()
 }
 
 // 5-1 & 5-2
 sealed class FunList<out T> {
     object Nil : FunList<Nothing>()
-    data class Cons<out T>(val head: T, val tail: FunList<T>): FunList<T>()
+    data class Cons<out T>(val head: T, val tail: FunList<T>) : FunList<T>()
 }
 
 // 5-1
@@ -140,4 +141,23 @@ fun sub_5_7() {
         )
     )
     println("Practice 5-7: ${list.takeWhile { it % 5 == 0 }}")
+}
+
+// 5-8
+tailrec fun <T, R> FunList<T>.indexedMap(index: Int = 0, acc: FunList<R> = FunList.Nil, f: (Int, T) -> R):
+        FunList<R> = when (this) {
+    FunList.Nil -> acc.reverse()
+    is FunList.Cons -> tail.indexedMap(index + 1, acc.addHead(f(index, head)), f)
+}
+fun sub_5_8() {
+    val intList = FunList.Cons(1, FunList.Cons(2, FunList.Cons(3, FunList.Nil)))
+    require(intList.indexedMap { index, elm -> index * elm } == funListOf(0, 2, 6))
+    println("Practice 5-8: ${intList.indexedMap { index, elm -> index * elm }}")
+}
+
+fun <T> funListOf(vararg elements: T): FunList<T> = elements.toFunList()
+
+private fun <T> Array<out T>.toFunList(): FunList<T> = when {
+    this.isEmpty() -> FunList.Nil
+    else -> FunList.Cons(this[0], this.copyOfRange(1, this.size).toFunList())
 }
